@@ -40,13 +40,13 @@ public:
 	
 	void GenerateTree()
 	{
-		std::cout << "\n GENERATING THE TREE NOW! \n";
+		std::cout << "\n GENERATING THE TREE NOW! \n\n";
 		
 		std::ifstream file("text.txt");
 		std::stringstream buffer;
 
 		buffer << file.rdbuf();
-		std::cout << buffer.str() << "\n";
+		std::cout << "TEXT FOUND IN FILE: " << buffer.str() << "\n";
 		const std::string text(buffer.str());
 
 		std::vector<char> char_map;
@@ -54,6 +54,7 @@ public:
 		
 		auto finished_build = false;
 		long current_pos = 0;
+		std::cout << "CHARACTERS FOUND IN FILE: \n";
 		while(!finished_build)
 		{
 			auto cc = text.at(current_pos);
@@ -76,10 +77,6 @@ public:
 			char_map.push_back(cc);
 			count_map.push_back(count);
 
-			//std::cout << "char: " << cc << " count: " << count << "\n";
-
-			std::cout << current_pos << "\n";
-
 			if (current_pos > text.size() - 1)
 				finished_build = true;
 		}
@@ -94,7 +91,7 @@ public:
 		std::reverse(final_map.begin(), final_map.end());
 
 		for(auto p : final_map)
-			std::cout << "Char: " << p.second << " Count: " << p.first << "\n";
+			std::cout << "\tChar: " << p.second << " Count: " << p.first << "\n";
 
 		node_queue = std::vector<std::pair<int, std::shared_ptr<node>>>();
 		for (auto p : final_map)
@@ -106,7 +103,7 @@ public:
 	void OrderTree()
 	{
 
-		std::cout << "\n ORDERING THE TREE NOW! \n";
+		std::cout << "\n ORDERING THE TREE NOW! \n\n";
 		
 		bool end_gen = false;
 		while (!end_gen)
@@ -135,7 +132,7 @@ public:
 
 	void GenerateCharacterMap()
 	{
-		std::cout << "\n GENERATING CHARACTER MAP! \n";
+		std::cout << "\n GENERATING CHARACTER MAP NOW! \n\n";
 		
 		character_map = std::vector<std::shared_ptr<node>>(0);
 		std::vector<std::shared_ptr<node>> check_list;
@@ -161,11 +158,12 @@ public:
 			}
 			check_list.erase(check_list.begin());
 		}
-		
+
+		std::cout << "CHARACTERS BUILT: \n";
 		//std::sort(character_map.begin(), character_map.end());
 		for (auto h : character_map)
 		{
-			std::cout << "Char: " << h->character << " Code: " << h->pos << "\n";
+			std::cout << "\tChar: " << h->character << " Code: " << h->pos << "\n";
 		}
 		
 		//DrawTree();
@@ -194,13 +192,13 @@ public:
 			}
 		}
 		new_file_size = size;
-		std::cout << "Current Size: " << new_file_size << "Bits\n";
+		std::cout << "\tCURRENT SIZE: " << new_file_size << "BITS\n";
 		GenerateEndFile();
 	}
 
 	void GenerateEndFile()
 	{
-		std::cout << "\n GENERATING OUT FILE! \n";
+		std::cout << "\n GENERATING OUT FILE! \n\n";
 		int curPos = 0;
 		char * byte_arr = new char[(new_file_size + 1) * 8];
 		std::ifstream file("text.txt");
@@ -210,7 +208,7 @@ public:
 		std::ofstream new_file("out.txt",std::ios::binary);
 		//std::cout << buffer.str() << "\n";
 		const std::string text(buffer.str());
-
+		std::cout << "DECODED TEXT: ";
 		for (auto c : text)
 		{
 			for (auto n : character_map)
@@ -285,7 +283,7 @@ public:
 				pos++;
 			}
 			current_node = top_node;
-			if (pos/8 > size)
+			if (std::floor(pos/8) > size)
 				end = true;
 		}
 	}
