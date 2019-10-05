@@ -14,10 +14,17 @@ class node
 public:
 	node(){}
 	node(char c):character(c),is_char(true){}
-	node(std::shared_ptr<node> l_node, std::shared_ptr<node> r_node) { left_node = l_node; right_node = r_node; }
+	node(std::shared_ptr<node> l_node, std::shared_ptr<node> r_node)
+	{
+		left_node = l_node;
+		right_node = r_node;
+		left_node->top_node = std::make_shared<node>(*this);
+		right_node->top_node = std::make_shared<node>(*this);
+	}
 	char character = ' ';
 	bool is_char = false;
 	std::string pos;
+	std::shared_ptr<node> top_node;
 	std::shared_ptr<node> left_node;
 	std::shared_ptr<node> right_node;
 };
@@ -28,6 +35,7 @@ public:
 	std::vector<std::pair<int, std::shared_ptr<node>>> node_queue;
 	std::vector<std::pair<int, char>> final_map;
 	std::vector<std::shared_ptr<node>> character_map;
+	int new_file_size = 0;
 	
 	void GenerateTree()
 	{
@@ -184,55 +192,50 @@ public:
 				}
 			}
 		}
-		std::cout << size;
+		new_file_size = std::ceil(size / 8);
+		std::cout << "Current Size: " << new_file_size << "B";
+		GenerateEndFile();
 	}
 
-	void DrawTree()
+	void GenerateEndFile()
 	{
-		print2D(node_queue.at(0).second);
-	}
-
-	/*void CalculateFileSize()
-	{
+		int curPos = 0;
+		char * byte_arr = new char[new_file_size];
 		std::ifstream file("text.txt");
 		std::stringstream buffer;
 
 		buffer << file.rdbuf();
-		std::cout << buffer.str() << "\n";
+		std::ofstream new_file("out.txt",std::ios::binary);
+		//std::cout << buffer.str() << "\n";
 		const std::string text(buffer.str());
-	}*/
 
-	void print2DUtil(std::shared_ptr<node> root, int space)
-	{
-		// Base case  
-		if (root == nullptr)
-			return;
-
-		// Increase distance between levels  
-		space += 1;
-
-		// Process right child first  
-		print2DUtil(root->right_node, space);
-
-		// Print current node after space  
-		// count  
-		std::cout << std::endl;
-		for (int i = 1; i < space; i++)
-			std::cout << "-";
-		std::cout << root->character;
-
-		// Process left child  
-		print2DUtil(root->left_node, space);
+		for (auto c : text)
+		{
+			for (auto n : character_map)
+			{
+				if(n->character == c)
+				{
+					for(auto v : n->pos)
+					{
+						WriteToBit(byte_arr, curPos, v == '1');
+						curPos++;
+					}
+					break;
+				}
+			}
+		}
+		new_file.write(byte_arr, new_file_size);
+		new_file.close();
 	}
 
-	// Wrapper over print2DUtil()  
-	void print2D(std::shared_ptr<node> root)
+	void WriteToBit(char * byte_arr, int pos, bool val)
 	{
-		// Pass initial space count as 0  
-		print2DUtil(root, 0);
+		int sec = std::floor((float)pos / 8);
+		int rest = pos % 8;
+		char bit = 128 >> rest;
+		char new_bit = (val * 128) >> rest;
+		byte_arr[sec] = (byte_arr[sec] & (~bit)) | new_bit;
 	}
-
-	
 };
 
 class huffman_decoder
