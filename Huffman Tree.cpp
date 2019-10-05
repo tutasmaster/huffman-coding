@@ -199,8 +199,16 @@ public:
 	void GenerateEndFile()
 	{
 		std::cout << "\n GENERATING OUT FILE! \n\n";
-		int curPos = 0;
-		char * byte_arr = new char[std::ceil(new_file_size/8) + 1];
+		unsigned long int curPos = 32; //COMPENSATING FOR THE LENGTH
+		char * byte_arr = new char[std::ceil(new_file_size/8) + 5]; //COMPENSATING FOR THE LENGTH
+
+		unsigned long int endPos = new_file_size + 32;
+		
+		byte_arr[0] = ((int)(endPos >> 24)) & 0xFF;
+		byte_arr[1] = ((int)(endPos >> 16)) & 0xFF;
+		byte_arr[2] = ((int)(endPos >>  8)) & 0xFF;
+		byte_arr[3] = ((int)(endPos)      ) & 0xFF;
+		
 		std::ifstream file("text.txt");
 		std::stringstream buffer;
 
@@ -217,18 +225,18 @@ public:
 					for(auto v : n->pos)
 					{
 						WriteToBit(byte_arr, curPos, v == '1');
-						if(curPos < new_file_size)
+						if(curPos < new_file_size + 32)
 							curPos++;
 					}
 					break;
 				}
 			}
 		}
-		for(int i = curPos; i < (std::ceil(new_file_size / 8) + 1) * 8; i++)
+		for(int i = curPos; i < (std::ceil(new_file_size / 8) + 5) * 8; i++)
 		{
 			WriteToBit(byte_arr, i, false);
 		}
-		new_file.write(byte_arr, std::ceil(new_file_size / 8) + 1);
+		new_file.write(byte_arr, std::ceil(new_file_size / 8) + 5);
 		new_file.close();
 		delete[] byte_arr;
 	}
@@ -250,7 +258,7 @@ public:
 	huffman_decoder(std::shared_ptr<node> top_node):top_node(std::move(top_node)){}
 	void DecodeFile()
 	{
-		std::cout << "\n DECODING...\n\n DECODED TEXT: ";
+		std::cout << "\n DECODING...\n\nDECODED TEXT: ";
 		std::ifstream file("out.txt",std::ios::ate | std::ios::binary);
 		std::stringstream buffer;
 
@@ -260,8 +268,11 @@ public:
 
 		char* char_arr = new char[size];
 		file.read(char_arr, size);
-
-		int pos = 0;
+		unsigned long int endPos = ((unsigned int)char_arr[0]) << 24;
+		endPos |= ((unsigned int)char_arr[1]) << 16;
+		endPos |= ((unsigned int)char_arr[2]) << 8;
+		endPos |= ((unsigned int)char_arr[3]);
+		int pos = 32;
 		bool end = false;
 		std::shared_ptr<node> current_node = top_node;
 		while (!end)
@@ -283,7 +294,7 @@ public:
 				pos++;
 			}
 			current_node = top_node;
-			if (std::ceil(pos/8) > size - 1)
+			if (pos >= endPos)
 				end = true;
 		}
 	}
