@@ -147,9 +147,9 @@ public:
 			}
 			auto n = check_list.at(0);
 			if(!n->is_char){
-				n->left_node->pos += "0" + n->pos;
+				n->left_node->pos += n->pos + "0";
 				check_list.push_back(n->left_node);
-				n->right_node->pos += "1" + n->pos;
+				n->right_node->pos += n->pos + "1";
 				check_list.push_back(n->right_node);
 				//std::cout << "Char: " << n->character << " | Code: " << n->pos << "\n";
 			}else
@@ -200,7 +200,7 @@ public:
 	{
 		std::cout << "\n GENERATING OUT FILE! \n\n";
 		int curPos = 0;
-		char * byte_arr = new char[(new_file_size + 1) * 8];
+		char * byte_arr = new char[std::ceil(new_file_size/8) + 1];
 		std::ifstream file("text.txt");
 		std::stringstream buffer;
 
@@ -208,7 +208,6 @@ public:
 		std::ofstream new_file("out.txt",std::ios::binary);
 		//std::cout << buffer.str() << "\n";
 		const std::string text(buffer.str());
-		std::cout << "DECODED TEXT: ";
 		for (auto c : text)
 		{
 			for (auto n : character_map)
@@ -218,18 +217,18 @@ public:
 					for(auto v : n->pos)
 					{
 						WriteToBit(byte_arr, curPos, v == '1');
-						if(curPos <= new_file_size)
+						if(curPos < new_file_size)
 							curPos++;
 					}
 					break;
 				}
 			}
 		}
-		for(int i = curPos; i < (new_file_size+1) * 8; i++)
+		for(int i = curPos; i < (std::ceil(new_file_size / 8) + 1) * 8; i++)
 		{
 			WriteToBit(byte_arr, i, false);
 		}
-		new_file.write(byte_arr, sizeof(byte_arr));
+		new_file.write(byte_arr, std::ceil(new_file_size / 8) + 1);
 		new_file.close();
 		delete[] byte_arr;
 	}
@@ -251,6 +250,7 @@ public:
 	huffman_decoder(std::shared_ptr<node> top_node):top_node(std::move(top_node)){}
 	void DecodeFile()
 	{
+		std::cout << "\n DECODING...\n\n DECODED TEXT: ";
 		std::ifstream file("out.txt",std::ios::ate | std::ios::binary);
 		std::stringstream buffer;
 
@@ -283,7 +283,7 @@ public:
 				pos++;
 			}
 			current_node = top_node;
-			if (std::floor(pos/8) > size)
+			if (std::ceil(pos/8) > size - 1)
 				end = true;
 		}
 	}
@@ -301,7 +301,7 @@ int main()
 {
 	huffman_encoder enc;
 	enc.GenerateTree();
-	/*huffman_decoder dec(enc.node_queue.at(0).second);
-	dec.DecodeFile();*/
+	huffman_decoder dec(enc.node_queue.at(0).second);
+	dec.DecodeFile();
 	return 0;
 }
