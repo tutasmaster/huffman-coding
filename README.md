@@ -1,4 +1,5 @@
 
+
 # Huffman Coding
 An attempt at replicating the [Huffman Compression/Decompression](https://en.wikipedia.org/wiki/Huffman_coding#Basic_technique) algorithms in C++.
 
@@ -53,6 +54,20 @@ CHARACTERS BUILT:
  GENERATING OUT FILE!
 
 
+ DRAWING THE BINARY TREE NOW!
+
+ +-----1+-----1+-----1I
+                     0S
+              0+-----1+-----1F
+                            0B
+                     0+-----1
+                            0A
+       0+-----1+-----1U
+                     0O
+              0+-----1M
+                     0+-----1D
+                            0X
+
  DECODING...
 
 DECODED TEXT: BIDOOFUS MAXIMUS
@@ -63,7 +78,7 @@ DECODED TEXT: BIDOOFUS MAXIMUS
 
 ## TO-DO
 
- - Drawing the Binary Tree
+ - ~~Drawing the Binary Tree~~
  - Serializing and including the Binary Tree in the out.txt file
  - Custom file input/output
  - Seperately executing the Compressor and Decompressor

@@ -239,8 +239,83 @@ public:
 		new_file.write(byte_arr, std::ceil(new_file_size / 8) + 5);
 		new_file.close();
 		delete[] byte_arr;
+
+		draw_binary_tree();
 	}
 
+	void draw_binary_tree()
+	{
+		std::cout << "\n DRAWING THE BINARY TREE NOW! \n\n";
+		int lowest_position = 0;
+		for(auto c : character_map)
+		{
+			if (c->pos.size() > lowest_position)
+				lowest_position = c->pos.size();
+		}
+
+		int delay = 0;
+
+		bool end = false;
+		auto current_node = node_queue.at(0).second;
+		std::vector<std::shared_ptr<node>> queue;
+		std::vector<std::string> full_string(256);
+		int current_string = 0;
+		int current_side = 0;
+		draw_binary_node(full_string, current_side, current_string,current_node);
+
+		for(auto s : full_string)
+		{
+			if (s.empty())
+				break;
+			std::cout << s << "\n";
+		}
+	}
+
+	void draw_binary_node(
+		std::vector<std::string>& str,
+		int current_side,
+		int current_string,
+		std::shared_ptr<node> n,
+		char prefix = ' ',
+		bool follow = false,
+		bool jump = false
+	){
+
+		if(jump)
+		{
+			int bonus = 0;
+			for(auto s : str)
+			{
+				if(s.empty())
+				{
+					break;
+				}
+				bonus++;
+			}
+			current_string = bonus;
+		}
+		
+		if (n == nullptr)
+			return;
+		if(follow)
+			for (int i = 0; i < current_side * 7; i++)
+				str.at(current_string) += " ";
+		if (n->is_char){
+			str.at(current_string) += prefix;
+			str.at(current_string) += n->character;
+		}
+		else{
+			str.at(current_string) += prefix;
+			str.at(current_string) += "+";
+			str.at(current_string) += "-----";
+		}
+		
+		draw_binary_node(str, current_side + 1,current_string, n->right_node, '1');
+		draw_binary_node(str, current_side + 1, current_string + 1, n->left_node, '0', true, true);
+	}
+
+	
+	
 	void write_to_bit(char * &byte_arr, int pos, bool val)
 	{
 		int sec = std::floor(static_cast<float>(pos) / 8);
