@@ -1,3 +1,4 @@
+
 # Huffman Coding
 An attempt at replicating the [Huffman Compression/Decompression](https://en.wikipedia.org/wiki/Huffman_coding#Basic_technique) algorithms in C++.
 
@@ -11,6 +12,7 @@ An attempt at replicating the [Huffman Compression/Decompression](https://en.wik
  The application will then show you the following output and generate a `out.txt` file with the encoded text.
 
 ### Output
+
 ```
     
  GENERATING THE TREE NOW!
@@ -53,8 +55,8 @@ CHARACTERS BUILT:
 
  DECODING...
 
-DECODED TEXT: BIDOOFUS MAXIMUS```
-
+DECODED TEXT: BIDOOFUS MAXIMUS
+```
 ### The Output File
  The output file consists of 4 bytes declaring the length of the output text + itself (used for decoding the exact ammount of characters), followed by the huffman coding itself.
  There is no serialization of the binary-tree yet.
