@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <algorithm>
 
@@ -35,7 +36,7 @@ public:
 	std::vector<std::pair<int, std::shared_ptr<node>>> node_queue;
 	std::vector<std::pair<int, char>> final_map;
 	std::vector<std::shared_ptr<node>> character_map;
-	int new_file_size = 0;
+	size_t new_file_size = 0;
 	
 	void GenerateTree()
 	{
@@ -192,15 +193,16 @@ public:
 				}
 			}
 		}
-		new_file_size = std::ceil(size / 8);
-		std::cout << "Current Size: " << new_file_size << "B";
+		new_file_size = size;
+		std::cout << "Current Size: " << new_file_size << "Bits\n";
 		GenerateEndFile();
 	}
 
 	void GenerateEndFile()
 	{
+		std::cout << "\n GENERATING OUT FILE! \n";
 		int curPos = 0;
-		char * byte_arr = new char[new_file_size];
+		char * byte_arr = new char[(new_file_size + 1) * 8];
 		std::ifstream file("text.txt");
 		std::stringstream buffer;
 
@@ -218,17 +220,23 @@ public:
 					for(auto v : n->pos)
 					{
 						WriteToBit(byte_arr, curPos, v == '1');
-						curPos++;
+						if(curPos <= new_file_size)
+							curPos++;
 					}
 					break;
 				}
 			}
 		}
-		new_file.write(byte_arr, new_file_size);
+		for(int i = curPos; i < (new_file_size+1) * 8; i++)
+		{
+			WriteToBit(byte_arr, i, false);
+		}
+		new_file.write(byte_arr, sizeof(byte_arr));
 		new_file.close();
+		delete[] byte_arr;
 	}
 
-	void WriteToBit(char * byte_arr, int pos, bool val)
+	void WriteToBit(char * &byte_arr, int pos, bool val)
 	{
 		int sec = std::floor((float)pos / 8);
 		int rest = pos % 8;
@@ -240,12 +248,62 @@ public:
 
 class huffman_decoder
 {
-	
+public:
+	std::shared_ptr<node> top_node;
+	huffman_decoder(std::shared_ptr<node> top_node):top_node(std::move(top_node)){}
+	void DecodeFile()
+	{
+		std::ifstream file("out.txt",std::ios::ate | std::ios::binary);
+		std::stringstream buffer;
+
+		file.seekg(0, file.end);
+		size_t size = file.tellg();
+		file.seekg(0, file.beg);
+
+		char* char_arr = new char[size];
+		file.read(char_arr, size);
+
+		int pos = 0;
+		bool end = false;
+		std::shared_ptr<node> current_node = top_node;
+		while (!end)
+		{
+			bool foundChar = false;
+			while(!foundChar){
+				bool bit = ReadFromBit(char_arr, pos);
+				if(bit == true)
+					current_node = current_node->right_node;
+				else
+					current_node = current_node->left_node;
+				
+
+				if (current_node->is_char) {
+					std::cout << current_node->character;
+					foundChar = true;
+				}
+				
+				pos++;
+			}
+			current_node = top_node;
+			if (pos/8 > size)
+				end = true;
+		}
+	}
+
+	bool ReadFromBit(char* byte_arr, int pos)
+	{
+		int sec = std::floor((float)pos / 8);
+		int rest = pos % 8;
+		char bit = 128 >> rest;
+		return (byte_arr[sec] & bit) != 0;
+	}
 };
 
 int main()
 {
 	huffman_encoder enc;
 	enc.GenerateTree();
+	/*huffman_decoder dec(enc.node_queue.at(0).second);
+	dec.DecodeFile();*/
 	return 0;
 }
